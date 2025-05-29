@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environment
+venv/
+env/
+.venv/
+ENV/
+
+# VSCode / IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS system files
+.DS_Store
+Thumbs.db
+
+# Logs and runtime files
+*.log
+*.pid
+*.sqlite3
+*.db
+
+# Environment variables
+.env
+.env.*
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+.cache/
+
+# Mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pydantic compiled schemas
+__pydantic__/
+
+# FastAPI auto-generated OpenAPI cache
+openapi.json
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Docker
+*.dockerfile
+docker-compose.override.yml
