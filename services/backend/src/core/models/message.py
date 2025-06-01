@@ -16,8 +16,8 @@ if TYPE_CHECKING:
 class Message(Base):
     __tablename__ = "messages"
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nulable=False)
-    chat_id: Mapped[int] = mapped_column(ForeignKey("chats.id"), nulable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    chat_id: Mapped[int] = mapped_column(ForeignKey("chats.id"), nullable=False)
     content: Mapped[str] = mapped_column(nullable=False)
     timestamp: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()

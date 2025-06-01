@@ -13,7 +13,7 @@ async def lifespan(app: FastAPI):
     yield
     await db_helper.dispose()
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 
 if __name__ == "__main__":

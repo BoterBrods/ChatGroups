@@ -1,13 +1,8 @@
-from contextlib import asynccontextmanager
 from pathlib import Path
 
 import redis
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-
-BASE_DIR = Path(__file__).parent.parent
-
 
 class DbSettings(BaseModel):
     url: str
