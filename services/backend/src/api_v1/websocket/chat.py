@@ -2,7 +2,7 @@ import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from .ConnectionManager import manager
-from api_v1.redis import save_message, get_history
+from api_v1.redis.redis_cient import save_message, get_history
 
 ws = APIRouter()
 
