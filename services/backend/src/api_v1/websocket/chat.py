@@ -5,7 +5,7 @@ from sqlalchemy import select
 from core.models import db_helper, User, Chat, Message
 from .ConnectionManager import manager
 from api_v1.redis.redis_client import save_message, get_history
-from .crud import get_user, get_chat
+from .dependencies import get_user, get_chat
 
 ws = APIRouter()
 

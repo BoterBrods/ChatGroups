@@ -17,7 +17,6 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-app.include_router(router, prefix="/api")
 
 app.include_router(router_chat_groups, prefix='/api')
 
