@@ -1,26 +1,27 @@
 from fastapi import WebSocket
 from collections import defaultdict
 
+
 class ConnectionManager:
     def __init__(self):
-        self.rooms: dict[str, list[WebSocket]] = defaultdict(list)
+        self.rooms: dict[int, list[WebSocket]] = defaultdict(list)
 
-    async def connect(self, websocket: WebSocket, subject: str):
+    async def connect(self, websocket: WebSocket, chat_id: int):
         await websocket.accept()
-        self.rooms[subject].append(websocket)
+        self.rooms[chat_id].append(websocket)
+        print(f"[WebSocket] Пользователь подключён к чату {chat_id} | Всего в комнате: {len(self.rooms[chat_id])}")
 
-    def disconnect(self, websocket: WebSocket):
-        for subject, connections in self.rooms.items():
-            if websocket in connections:
-                connections.remove(websocket)
-                break
+    async def disconnect(self, websocket: WebSocket, chat_id: int):
+        connections = self.rooms.get(chat_id, [])
+        if websocket in connections:
+            connections.remove(websocket)
+            print(f"[WebSocket] Пользователь отключён от чата {chat_id} | Осталось: {len(connections)}")
 
-    async def send_to_room(self, subject: str, message: str):
-        for connection in self.rooms.get(subject, []):
+
+
+    async def send_to_room(self, chat_id: int, message: str):
+        for connection in self.rooms.get(chat_id, []):
             await connection.send_text(message)
-
-    async def send_personal_message(self, message: str, websocket: WebSocket):
-        await websocket.send_text(message)
 
 
 manager = ConnectionManager()
