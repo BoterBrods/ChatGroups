@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class AuthRequest(BaseModel):
@@ -10,3 +10,5 @@ class AuthResponse(BaseModel):
     id: int
     name: str
     variant_number: int
+
+    model_config = ConfigDict(from_attributes=True)

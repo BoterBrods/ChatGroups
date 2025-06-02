@@ -1,75 +1,75 @@
 import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse
+from sqlalchemy import select
+
+from core.models import db_helper, User, Chat, Message
 from .ConnectionManager import manager
-from api_v1.redis.redis_cient import save_message, get_history
+from api_v1.redis.redis_client import save_message, get_history
+from .crud import get_user, get_chat
 
 ws = APIRouter()
 
 
-html = """
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Websocket Demo</title>
-           <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-
-    </head>
-    <body>
-    <div class="container mt-3">
-        <h1>FastAPI WebSocket Chat</h1>
-        <h2>Your ID: <span id="ws-id"></span></h2>
-        <form action="" onsubmit="sendMessage(event)">
-            <input type="text" class="form-control" id="messageText" autocomplete="off"/>
-            <button class="btn btn-outline-primary mt-2">Send</button>
-        </form>
-        <ul id='messages' class="mt-5">
-        </ul>
-
-    </div>
-
-        <script>
-            var client_id = Date.now()
-            document.querySelector("#ws-id").textContent = client_id;
-            const ws = new WebSocket(`ws://${location.host}/api/v1/chat/ws/${client_id}`);
-            ws.onmessage = function(event) {
-                var messages = document.getElementById('messages')
-                var message = document.createElement('li')
-                var content = document.createTextNode(event.data)
-                message.appendChild(content)
-                messages.appendChild(message)
-            };
-            function sendMessage(event) {
-                var input = document.getElementById("messageText")
-                ws.send(input.value)
-                input.value = ''
-                event.preventDefault()
-            }
-        </script>
-    </body>
-</html>
-"""
-
-
-@ws.get("/")
-async def get():
-    return HTMLResponse(html)
-
-@ws.websocket("/ws/{subject}/{client_id}")
-async def websocket_subject_chat(websocket: WebSocket, subject: str, client_id: int):
-    await manager.connect(websocket,subject)
-
-    history = await get_history(subject)
-    for old_msg in history:
-        await manager.send_personal_message(f"[HISTORY] {old_msg}", websocket)
+@ws.websocket("/ws/{chat_id}")
+async def websocket_subject_chat(
+    websocket: WebSocket,
+    chat_id: int,
+):
+    await manager.connect(websocket, str(chat_id))
 
     try:
-        while True:
-            data = await websocket.receive_text()
-            formatted = f"{client_id} @ {subject}: {data}"
-            await save_message(subject, formatted)
-            await manager.send_to_room(subject,formatted)
+        history = await get_history(chat_id, limit=20)
+        for item in history:
+            await websocket.send_text(item)
+
+        async with db_helper.session_factory as session:
+            while True:
+                data = await websocket.receive_json()
+                username = data["username"]
+                variant = data["variant"]
+                content = data["content"]
+
+                user = await get_user(
+                    session=session,
+                    username=username,
+                    variant=variant,
+                )
+
+                if not user:
+                    await websocket.send_text(
+                        json.dumps({"error": "Пользователь не найден"})
+                    )
+                    continue
+
+                chat = await get_chat(
+                    session=session,
+                    chat_id=chat_id,
+                )
+
+                if not chat:
+                    await websocket.send_text(json.dumps({"error": "Чат не найден"}))
+                    continue
+
+                message = Message(
+                    content=content,
+                    user_id=user.id,
+                    chat_id=chat.id,
+                )
+                session.add(message)
+                await session.commit()
+                await session.refresh(message)
+
+                message_dict = {
+                    "username": user.username,
+                    "variant": user.variant,
+                    "content": message.content,
+                    "timestamp": message.timestamp.isoformat(),
+                }
+                message_json = json.dumps(message_dict)
+
+                await save_message(chat_id, message_json)
+
+                await manager.broadcast(str(chat_id), message_json)
+
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
-        await manager.send_to_room(subject,f"{client_id} покинул чат {subject}")
+        manager.disconnect(websocket, str(chat_id))

@@ -6,7 +6,7 @@ redis_client = redis.Redis(host="localhost", port=6379, decode_responses=True)
 
 MAX_MESSAGES = 50
 
-async def save_message(subject: str, message: str):
+async def save_message(subject: int, message: str):
     key = f"chat:{subject}"
     try:
         await redis_client.rpush(key, message)
@@ -17,7 +17,7 @@ async def save_message(subject: str, message: str):
         print(f"[System] Неизвестная ошибка в save_message: {error}")
 
 
-async def get_history(subject: str, limit: int = 20):
+async def get_history(subject: int, limit: int = 20):
     key = f"chat:{subject}"
     try:
         return await redis_client.lrange(key, -limit, -1)
