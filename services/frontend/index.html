@@ -1,42 +1,13 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <title>Чат по предметам</title>
-</head>
-<body>
-  <h2>Выберите комнату</h2>
-  <input id="room" placeholder="math, cs...">
-  <input id="username" placeholder="ваше имя">
-  <button onclick="join()">Войти</button>
-
-  <div id="chat" style="display:none">
-    <div id="messages"></div>
-    <input id="text" placeholder="Введите сообщение">
-    <button onclick="sendMessage()">Отправить</button>
-  </div>
-
-  <script>
-    let socket;
-
-    function join() {
-      const room = document.getElementById("room").value;
-      const name = document.getElementById("username").value;
-      socket = new WebSocket(`ws://localhost:8000/ws/${room}/${name}`);
-
-      document.getElementById("chat").style.display = "block";
-
-      socket.onmessage = (event) => {
-        const msg = document.createElement("div");
-        msg.textContent = event.data;
-        document.getElementById("messages").appendChild(msg);
-      }
-    }
-
-    function sendMessage() {
-      const text = document.getElementById("text").value;
-      socket.send(text);
-      document.getElementById("text").value = "";
-    }
-  </script>
-</body>
+<html lang="">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vite App</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
 </html>
