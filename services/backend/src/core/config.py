@@ -22,6 +22,12 @@ class DbSettings(BaseModel):
     }
 
 
+class RedisConfig:
+    REDIS_HOST = "127.0.0.1"
+    REDIS_PORT = 6379
+    REDIS_DB = 0
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=(".env", ".env.local"),
@@ -31,6 +37,15 @@ class Settings(BaseSettings):
         extra="ignore"
     )
     db: DbSettings
+    redis: RedisConfig = RedisConfig()
 
 
 settings = Settings()
+
+redis_client = redis.StrictRedis(
+    host=settings.redis.REDIS_HOST,
+    port=settings.redis.REDIS_PORT,
+    db=settings.redis.REDIS_DB,
+    decode_responses=True,
+)
+

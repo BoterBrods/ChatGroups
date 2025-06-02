@@ -1,8 +1,6 @@
 import redis.asyncio as redis
 from redis.exceptions import RedisError
-from config import settings
-
-redis_client = redis.Redis(host=settings.host, port=settings.port, decode_responses=True)
+from core.config import redis_client
 
 
 MAX_MESSAGES = 50
