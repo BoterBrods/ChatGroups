@@ -1,7 +1,7 @@
 import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from sqlalchemy import select
-
+from api_v1.redis.pubsub import publish_message
 from core.models import db_helper, User, Chat, Message
 from .ConnectionManager import manager
 from api_v1.redis.redis_client import save_message, get_history
@@ -15,7 +15,7 @@ async def websocket_subject_chat(
     websocket: WebSocket,
     chat_id: int,
 ):
-    await manager.connect(websocket, str(chat_id))
+    await manager.connect(websocket, chat_id)
 
     try:
         history = await get_history(chat_id, limit=20)
@@ -69,7 +69,6 @@ async def websocket_subject_chat(
 
                 await save_message(chat_id, message_json)
 
-                await manager.broadcast(str(chat_id), message_json)
-
+                await publish_message(chat_id, message_dict)
     except WebSocketDisconnect:
-        manager.disconnect(websocket, str(chat_id))
+        manager.disconnect(websocket, chat_id)
