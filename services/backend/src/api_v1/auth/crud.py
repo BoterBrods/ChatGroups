@@ -25,11 +25,6 @@ async def login_user(
         await session.commit()
         await session.refresh(user)
 
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="User already exists",
-        )
 
     return AuthResponse(
         id=user.id,
