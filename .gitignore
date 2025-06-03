@@ -29,7 +29,9 @@ Thumbs.db
 
 # Environment variables
 .env
+.env.local
 .env.*
+src/.env
 
 # Pytest
 .pytest_cache/
@@ -56,3 +58,4 @@ dist/
 # Docker
 *.dockerfile
 docker-compose.override.yml
+
