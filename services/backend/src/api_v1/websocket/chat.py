@@ -71,4 +71,4 @@ async def websocket_subject_chat(
 
                 await publish_message(chat_id, message_dict)
     except WebSocketDisconnect:
-        manager.disconnect(websocket, chat_id)
+        await manager.disconnect(websocket, chat_id)

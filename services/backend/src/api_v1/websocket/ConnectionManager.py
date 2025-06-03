@@ -19,9 +19,11 @@ class ConnectionManager:
 
 
 
-    async def send_to_room(self, chat_id: int, message: str):
-        for connection in self.rooms.get(chat_id, []):
+async def send_to_room(self, chat_id: int, message: str):
+    for connection in self.rooms.get(chat_id, []):
+        try:
             await connection.send_text(message)
-
+        except Exception as e:
+            print(f"[WebSocket] Ошибка при отправке: {e}")
 
 manager = ConnectionManager()
